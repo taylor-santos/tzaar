@@ -1,0 +1,49 @@
+name: CMake Linux Clang
+
+on: [ push, pull_request ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ ubuntu-18.04, ubuntu-20.04, ubuntu-22.04 ]
+        compiler: [ 9, 10, 11, 12 ]
+        exclude:
+          - platform: ubuntu-18.04
+            compiler: 11
+          - platform: ubuntu-18.04
+            compiler: 12
+          - platform: ubuntu-22.04
+            compiler: 9
+          - platform: ubuntu-22.04
+            compiler: 10
+    name: ${{ matrix.platform }} - Clang ${{ matrix.compiler }}
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get install -y xorg-dev libgl1-mesa-dev clang-${{ matrix.compiler }}
+
+      - name: Configure CMake
+        env:
+          CC: clang-${{ matrix.compiler }}
+          CXX: clang++-${{ matrix.compiler }}
+        run: cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+
+      - name: Test
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          working-directory: ${{ github.workspace }}/build/test
+          run: ctest -C ${{ env.BUILD_TYPE }} --rerun-failed --output-on-failure

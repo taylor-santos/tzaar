@@ -1,0 +1,48 @@
+name: CMake MacOS Clang
+
+on: [ push, pull_request ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - platform: macos-11
+            compiler: 13
+            cc: "clang"
+            cxx: "clang++"
+          - platform: macos-11
+            compiler: 14
+            cc: "$(brew --prefix llvm)/bin/clang"
+            cxx: "$(brew --prefix llvm)/bin/clang++"
+          - platform: macos-12
+            compiler: 13
+            cc: "clang"
+            cxx: "clang++"
+          - platform: macos-12
+            compiler: 14
+            cc: "$(brew --prefix llvm)/bin/clang"
+            cxx: "$(brew --prefix llvm)/bin/clang++"
+
+    name: ${{ matrix.target.platform }} - Clang ${{ matrix.target.compiler }}
+    runs-on: ${{ matrix.target.platform }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure CMake
+        run: |
+          export CC=${{ matrix.target.cc }}
+          export CXX=${{ matrix.compiler.cxx }}
+          cmake -B ${{ github.workspace }}/build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+
+      - name: Test
+        working-directory: ${{ github.workspace }}/build/test
+        run: ctest -C ${{ env.BUILD_TYPE }} --rerun-failed --output-on-failure

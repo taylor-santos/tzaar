@@ -1,0 +1,30 @@
+name: CMake Windows MSVC
+
+on: [ push, pull_request ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [ windows-2019, windows-2022 ]
+        architecture: [ Win32, x64 ]
+
+    name: ${{ matrix.platform }} - ${{ matrix.architecture }}
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Configure CMake
+        run: cmake -A ${{ matrix.architecture }} -B ${{ github.workspace }}/build
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+
+      - name: Test
+        working-directory: ${{ github.workspace }}/build/test
+        run: ctest -C ${{ env.BUILD_TYPE }} --rerun-failed --output-on-failure
