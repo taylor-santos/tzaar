@@ -3,9 +3,11 @@ set(LIB_NAME
 
 set(BUILD_SRC
         src/tzaar.cpp
+        src/stun.cpp
         )
 
 set(PUBLIC_LIBS
+        asio
         )
 
 add_library(${LIB_NAME}

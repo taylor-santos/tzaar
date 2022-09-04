@@ -4,6 +4,8 @@
 
 #include "doctest/doctest.h"
 
+#include <string>
+
 #include "tzaar.hpp"
 
 TEST_SUITE_BEGIN("Tzaar");

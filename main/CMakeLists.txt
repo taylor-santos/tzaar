@@ -12,11 +12,6 @@ target_link_libraries(${PROJECT_NAME}
         SDL2-static SDL2main
         )
 
-IF (APPLE)
-    FIND_LIBRARY(COREAUDIO_LIBRARY CoreAudio)
-    FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
-ENDIF (APPLE)
-
 if (MSVC)
     target_compile_options(${PROJECT_NAME}
             PRIVATE /W4 /WX)

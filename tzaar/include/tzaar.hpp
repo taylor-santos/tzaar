@@ -4,8 +4,6 @@
 
 #pragma once
 
-#include <string>
-
 namespace Tzaar {
 
 const char *
